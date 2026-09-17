@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NOOP — Does nothing. Forever.</title>
+<meta name="description" content="$NOOP is a memecoin that does nothing. This page and the game inside it are stored on Solana with the program that does nothing. No server. No roadmap. No utility.">
+<meta property="og:title" content="NOOP — Does nothing. Forever.">
+<meta property="og:description" content="A memecoin honest enough to say it does nothing. Whole site + game inscribed on Solana with the No-op program. Play it from the ledger.">
+<meta property="og:image" content="https://noopcoin.fun/og.png">
+<meta property="og:url" content="https://noopcoin.fun/">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%230b0d13'/%3E%3Ctext x='32' y='42' font-family='monospace' font-weight='bold' font-size='24' fill='%235ee0c2' text-anchor='middle'%3ENOP%3C/text%3E%3C/svg%3E">
+<style>
+  html,body{margin:0;background:#05070d;color:#e8ecf5;font-family:ui-monospace,Menlo,Consolas,monospace;min-height:100vh;display:flex;align-items:center;justify-content:center;text-align:center}
+  .box{max-width:520px;padding:24px}
+  h1{color:#5ee0c2;font-size:44px;margin:0 0 6px;letter-spacing:-.02em}
+  p{color:#8a93a8;font-size:14px;line-height:1.5;margin:8px 0}
+  .bar{height:6px;background:#1c2230;border-radius:3px;overflow:hidden;margin:18px 0 8px}
+  .bar i{display:block;height:100%;width:0;background:#5ee0c2;transition:width .15s}
+  code{color:#e8ecf5}
+  a{color:#5ee0c2}
+</style>
+<script src="config.js"></script>
+</head>
+<body>
+<div class="box">
+  <h1>NOOP</h1>
+  <p>Does nothing. Forever.</p>
+  <div class="bar"><i id="bar"></i></div>
+  <p id="st">reading the ledger…</p>
+  <p id="err" style="color:#e4322b"></p>
+</div>
+<script>
+(async () => {
+  const C = window.NOOP_CONFIG || {};
+  const st = document.getElementById('st'), bar = document.getElementById('bar'), err = document.getElementById('err');
+  const say = (s, p) => { st.textContent = s; if (p != null) bar.style.width = (p * 100).toFixed(1) + '%'; };
+  const boot = html => { C.loaded_from_chain = !!C.root; document.open(); document.write('<script>window.NOOP_CONFIG=' + JSON.stringify(C) + '<\/script>' + html); document.close(); };
+  try {
+    if (!C.root) {
+      say('preview build · loading from this server', 0.5);
+      const r = await fetch('bundle.html?v=' + Date.now()); if (!r.ok) throw new Error('bundle missing');
+      boot(await r.text()); return;
+    }
+    // --- read from chain ---
+    const B58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+    const dec = s => { const b = [0]; for (const ch of s) { let c = B58.indexOf(ch); if (c < 0) throw new Error('b58'); for (let i = 0; i < b.length; i++) { c += b[i] * 58; b[i] = c & 255; c >>= 8; } while (c) { b.push(c & 255); c >>= 8; } } for (const ch of s) { if (ch !== '1') break; b.push(0); } return new Uint8Array(b.reverse()); };
+    const enc = buf => { const d = [0]; for (const x of buf) { let c = x; for (let i = 0; i < d.length; i++) { c += d[i] << 8; d[i] = c % 58; c = (c / 58) | 0; } while (c) { d.push(c % 58); c = (c / 58) | 0; } } let s = ''; for (const x of buf) { if (x) break; s += '1'; } for (let i = d.length - 1; i >= 0; i--) s += B58[d[i]]; return s; };
+    let id = 1;
+    async function rpc(body) { const r = await fetch(C.rpc, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }); return r.json(); }
+    async function txData(sigs) {
+      // returns Uint8Array data of the first (only) instruction of each tx, batched
+      const out = new Array(sigs.length); const todo = sigs.map((s, i) => i);
+      for (let attempt = 0; attempt < 6 && todo.length; attempt++) {
+        for (let k = 0; k < todo.length; k += 25) {
+          const part = todo.slice(k, k + 25);
+          const res = await rpc(part.map(i => ({ jsonrpc: '2.0', id: id++, method: 'getTransaction', params: [sigs[i], { encoding: 'json', maxSupportedTransactionVersion: 1 }] })));
+          const arr = Array.isArray(res) ? res : [res];
+          arr.forEach((r, j) => { const i = part[j]; const d = r && r.result && r.result.transaction.message.instructions[0].data; if (d) out[i] = dec(d); });
+          say('reading transaction ' + out.filter(Boolean).length + ' / ' + sigs.length, out.filter(Boolean).length / sigs.length);
+        }
+        for (let i = todo.length - 1; i >= 0; i--) if (out[todo[i]]) todo.splice(i, 1);
+        if (todo.length) await new Promise(r => setTimeout(r, 800 * (attempt + 1)));
+      }
+      if (todo.length) throw new Error('rpc gave up on ' + todo.length + ' chunks');
+      return out;
+    }
+    say('reading root transaction', 0.02);
+    const [root] = await txData([C.root]);
+    // root: "NOOP" + ver(1) + sha(32) + size(4 LE) + nchunks(2 LE) + nindex(2 LE) + index sigs (64 each)
+    if (String.fromCharCode(...root.slice(0, 4)) !== 'NOOP') throw new Error('not a NOOP root');
+    const sha = [...root.slice(5, 37)].map(b => b.toString(16).padStart(2, '0')).join('');
+    const dv = new DataView(root.buffer, root.byteOffset);
+    const size = dv.getUint32(37, true), nchunks = dv.getUint16(41, true), nindex = dv.getUint16(43, true);
+    const idxSigs = []; for (let i = 0; i < nindex; i++) idxSigs.push(enc(root.slice(45 + i * 64, 45 + i * 64 + 64)));
+    say('reading ' + nindex + ' index transactions', 0.05);
+    const idx = await txData(idxSigs);
+    const chunkSigs = []; for (const d of idx) for (let o = 0; o + 64 <= d.length; o += 64) chunkSigs.push(enc(d.slice(o, o + 64)));
+    if (chunkSigs.length !== nchunks) throw new Error('index mismatch ' + chunkSigs.length + '/' + nchunks);
+    const chunks = await txData(chunkSigs);
+    const gz = new Uint8Array(chunks.reduce((n, c) => n + c.length, 0)); let o = 0; for (const c of chunks) { gz.set(c, o); o += c.length; }
+    if (gz.length !== size) throw new Error('size mismatch');
+    say('verifying sha-256', 0.97);
+    const got = [...new Uint8Array(await crypto.subtle.digest('SHA-256', gz))].map(b => b.toString(16).padStart(2, '0')).join('');
+    if (got !== sha) throw new Error('hash mismatch');
+    say('booting from the ledger', 1);
+    const html = await new Response(new Blob([gz]).stream().pipeThrough(new DecompressionStream('gzip'))).text();
+    C.sha = sha; C.bytes = size; C.chunks = 1 + nindex + nchunks; C.index = nindex;
+    boot(html);
+  } catch (e) {
+    err.innerHTML = 'the ledger did nothing: ' + (e && e.message ? e.message : e) + '<br><a href="javascript:location.reload()">try again</a>';
+  }
+})();
+</script>
+</body>
+</html>

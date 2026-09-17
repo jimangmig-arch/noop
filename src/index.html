@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>NOOP — Does nothing. Forever.</title>
+<meta name="description" content="$NOOP is a memecoin that does nothing. This page and the game inside it are stored on Solana with the program that does nothing. No server. No roadmap. No utility.">
+<meta property="og:title" content="NOOP — Does nothing. Forever.">
+<meta property="og:description" content="A memecoin honest enough to say it does nothing. Whole site + game inscribed on Solana with the No-op program. Play it from the ledger.">
+<meta property="og:type" content="website">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='10' fill='%230b0d13'/%3E%3Ctext x='32' y='42' font-family='monospace' font-weight='bold' font-size='24' fill='%235ee0c2' text-anchor='middle'%3ENOP%3C/text%3E%3C/svg%3E">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="scan" aria-hidden="true"></div>
+<header class="top">
+  <a class="brand" href="#" data-tab="play"><span class="chip">NOP</span><span>$NOOP</span></a>
+  <nav>
+    <a href="#play" data-tab="play">Play</a>
+    <a href="#nothing" data-tab="nothing">Nothing</a>
+    <a href="#proof" data-tab="proof">Proof</a>
+    <a id="lnk-x" href="#" target="_blank" rel="noopener">X</a>
+    <a id="lnk-pump" href="#" target="_blank" rel="noopener">pump.fun</a>
+    <a id="lnk-git" href="#" target="_blank" rel="noopener">GitHub</a>
+  </nav>
+</header>
+
+<main>
+  <section class="hero">
+    <p class="eyebrow" id="served">served from the Solana ledger · 0 servers</p>
+    <h1>Does nothing.<br>Forever.</h1>
+    <p class="lede">A <b>NOOP</b> is the instruction that does nothing. This page, and the game inside it, are stored on Solana with the program that does nothing. No server. No roadmap. No utility. Every other coin pretends. This one doesn't.</p>
+    <div class="ca" id="ca-box" hidden>
+      <span class="lbl">CA</span><code id="ca"></code><button id="ca-copy" type="button">copy</button>
+    </div>
+    <details class="what">
+      <summary>what's a noop?</summary>
+      <p>Every CPU has an instruction called <b>NOP</b>, "no operation." It does nothing for one cycle, on purpose. It exists to pad, to wait, to hold a spot.</p>
+      <p>Solana ships a program literally named <b>No-op</b>. Send it a transaction with data attached and it does nothing except leave that data in the permanent ledger. That's how this whole site got on chain.</p>
+      <p>So: the CPU instruction that does nothing, stored by the program that does nothing, as the coin that does nothing. Three noops. One joke. Forever.</p>
+    </details>
+  </section>
+
+  <section id="play" class="tab">
+    <div class="game-wrap">
+      <canvas id="game" width="320" height="200"></canvas>
+      <button id="fire" type="button" aria-label="halt">HALT</button>
+    </div>
+    <p class="hint">You are a NOOP instruction inside a CPU. Every other instruction is trying to do something. Halt them. Four levels. The last one is called RUG.</p>
+    <p class="hint dim">WASD move · mouse or arrows look · click / Ctrl / Space halt · M minimap · Esc pause. On phones: left half of the screen moves, right half looks, HALT button halts.</p>
+  </section>
+
+  <section id="nothing" class="tab" hidden>
+    <div class="counter">
+      <div class="big" id="count">—</div>
+      <div class="lbl">nothings done on chain</div>
+    </div>
+    <p class="lede">Press the button. Your wallet sends a real transaction to Solana's No-op program that does nothing, with a note that says so. It is recorded forever. It costs a fraction of a cent. It is the only stat here that can only go up.</p>
+    <div class="actions">
+      <button id="do-nothing" class="primary" type="button">Do nothing</button>
+      <span id="nothing-status" class="status"></span>
+    </div>
+    <div class="cols">
+      <div>
+        <h3>most nothing done</h3>
+        <ol id="leaders" class="list"><li class="dim">loading…</li></ol>
+      </div>
+      <div>
+        <h3>recent nothing</h3>
+        <ul id="recent" class="list"><li class="dim">loading…</li></ul>
+      </div>
+    </div>
+    <p class="hint dim">Works with Phantom, Solflare or any wallet that exposes <code>window.solana</code>. The transaction touches two programs: No-op (data: "did nothing") and Memo (so explorers show your note). It moves no tokens and asks for no approvals beyond that one signature.</p>
+  </section>
+
+  <section id="proof" class="tab" hidden>
+    <h2>Check it yourself.</h2>
+    <p class="lede">The DOOM coin said "127 SOL invested." The wallet showed 0.012. We post the real numbers, to the lamport, and the script that rebuilds this page from chain.</p>
+    <dl class="facts">
+      <dt>root transaction</dt><dd><a id="p-root" href="#" target="_blank" rel="noopener">not inscribed yet</a></dd>
+      <dt>transactions</dt><dd id="p-chunks">—</dd>
+      <dt>bytes on chain</dt><dd id="p-bytes">—</dd>
+      <dt>real cost</dt><dd id="p-cost">—</dd>
+      <dt>sha-256</dt><dd id="p-sha" class="mono">—</dd>
+      <dt>inscription wallet</dt><dd><a id="p-wallet" href="#" target="_blank" rel="noopener" class="mono">—</a></dd>
+      <dt>creator fee wallet</dt><dd><a id="p-fees" href="#" target="_blank" rel="noopener" class="mono">—</a></dd>
+      <dt>program</dt><dd><a href="https://solscan.io/account/noopb9bkMVfRPU8AsbpTUg8AQkHtKwMYZiFUjNRtMmV" target="_blank" rel="noopener" class="mono">noopb9bk…RtMmV (SPL No-op)</a></dd>
+    </dl>
+    <h3>how this page loads</h3>
+    <ol class="steps">
+      <li>A 2 KB loader on noopcoin.fun asks a Solana RPC node for the root transaction.</li>
+      <li>The root lists the index transactions. The indexes list every data chunk, in order.</li>
+      <li>Your browser fetches the chunks, concatenates them, gunzips the result.</li>
+      <li>It hashes the bytes and compares them to the SHA-256 in the root. Match, and the page you're reading replaces the loader.</li>
+    </ol>
+    <h3>verify in 20 lines</h3>
+    <pre id="verify"><code>// node verify.mjs &lt;root signature&gt;
+// rebuilds noop.html.gz from chain and prints its sha-256
+// full script + inscriber: see GitHub</code></pre>
+    <h3>the honest part</h3>
+    <ul class="list">
+      <li>One coin. There will never be a sequel, a v2, or a "real" launch.</li>
+      <li>The creator fee wallet is public, above. What happens to fees is written in the pinned post and never changes.</li>
+      <li>The inscription wallet was funded from a wallet you can see, not through a mixer.</li>
+      <li>Built by one person and an AI (Claude Code) in a couple of days. The game is original code. No borrowed engine.</li>
+    </ul>
+  </section>
+</main>
+
+<footer>
+  <p>Nothing here is financial advice. Nothing here is anything. <span id="foot-git"></span></p>
+</footer>
+
+<script src="game.js"></script>
+<script src="site.js"></script>
+</body>
+</html>
