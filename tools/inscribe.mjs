@@ -24,8 +24,9 @@ const DRY = args.includes('--dry');
 const PAYLOAD = Number((args.find(a => a.startsWith('--payload=')) || '--payload=1024').split('=')[1]);
 const CLUSTER = DEVNET ? 'devnet' : 'mainnet';
 const RPC = process.env.NOOP_RPC || (DEVNET ? 'https://api.devnet.solana.com' : 'https://api.mainnet-beta.solana.com');
-const NOOP = new PublicKey('noopb9bkMVfRPU8AsbpTUg8AQkHtKwMYZiFUjNRtMmV');
-const PARALLEL = 6;
+const NOOP = new PublicKey('noopXHpJChmCfa1JpS69Y3AesNc27mz3b2JsxwizYCX');
+const PARALLEL = Number(process.env.NOOP_PARALLEL || 3);
+process.on("unhandledRejection", e => console.log("  (rpc hiccup) " + String(e.message || e).slice(0, 100)));
 
 const keyPath = resolve(ROOT, 'keys', `inscriber.${CLUSTER}.json`);
 const nothingPath = resolve(ROOT, 'keys', `nothing.${CLUSTER}.json`);
@@ -121,9 +122,11 @@ console.log(`root ${progress.root}`);
 // 4. real cost, to the lamport
 console.log('summing real fees…');
 let cost = 0; const all = [...progress.data, ...progress.index, progress.root];
-for (let k = 0; k < all.length; k += 20) {
-  const txs = await Promise.all(all.slice(k, k + 20).map(s => conn.getTransaction(s, { commitment: 'confirmed', maxSupportedTransactionVersion: 1 })));
-  for (const t of txs) cost += t?.meta?.fee || 0;
+for (const s of all) {
+  let t = null;
+  for (let a = 0; a < 6 && !t; a++) { try { t = await conn.getTransaction(s, { commitment: 'confirmed', maxSupportedTransactionVersion: 1 }); } catch (e) { await new Promise(r => setTimeout(r, 1500 * (a + 1))); } if (!t) await new Promise(r => setTimeout(r, 800)); }
+  if (!t) throw new Error('could not fetch fee for ' + s);
+  cost += t.meta.fee; await new Promise(r => setTimeout(r, 250));
 }
 progress.cost_lamports = cost; progress.wallet = payer.publicKey.toBase58(); progress.nothing = nothing.publicKey.toBase58(); progress.bytes = gz.length; progress.chunks = all.length; progress.nindex = nIndex; save();
 console.log(`real cost ${cost.toLocaleString()} lamports = ${(cost / LAMPORTS_PER_SOL).toFixed(6)} SOL`);

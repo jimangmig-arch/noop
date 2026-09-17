@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Rebuild noopcoin.fun from the Solana ledger and check the hash. No trust required.
 //   node tools/verify.mjs <root signature> [--devnet] [--rpc=https://...]
-// Writes verified.noop.html.gz and verified.noop.html next to this script's parent dir.
+// Writes verified.noop.html.gz and verified.noop.html in the current directory.
 import { Connection } from '@solana/web3.js';
 import bs58 from 'bs58';
 import { createHash } from 'node:crypto';
@@ -13,16 +13,19 @@ if (!root) { console.log('usage: node tools/verify.mjs <root signature> [--devne
 const devnet = process.argv.includes('--devnet');
 const rpc = (process.argv.find(a => a.startsWith('--rpc=')) || '').slice(6) || (devnet ? 'https://api.devnet.solana.com' : 'https://api.mainnet-beta.solana.com');
 const conn = new Connection(rpc, 'confirmed');
+const sleep = ms => new Promise(r => setTimeout(r, ms));
 
+// one instruction per tx; its data is the payload
 const data = async sig => {
-  for (let i = 0; i < 5; i++) {
-    const tx = await conn.getTransaction(sig, { maxSupportedTransactionVersion: 1 });
-    if (tx) return Buffer.from(bs58.decode(tx.transaction.message.instructions[0].data));
-    await new Promise(r => setTimeout(r, 1000));
+  for (let i = 0; i < 8; i++) {
+    try { const tx = await conn.getTransaction(sig, { maxSupportedTransactionVersion: 1 }); if (tx) return Buffer.from(bs58.decode(tx.transaction.message.instructions[0].data)); }
+    catch (e) { /* rate limited: back off */ }
+    await sleep(800 * (i + 1));
   }
   throw new Error('tx not found ' + sig);
 };
-const many = async sigs => { const out = []; for (let i = 0; i < sigs.length; i += 10) { out.push(...await Promise.all(sigs.slice(i, i + 10).map(data))); process.stdout.write(`\r  ${out.length}/${sigs.length}`); } console.log(); return out; };
+// public RPCs rate-limit getTransaction hard, so one at a time with a small gap
+const many = async sigs => { const out = []; for (const s of sigs) { out.push(await data(s)); process.stdout.write('\r  ' + out.length + '/' + sigs.length); await sleep(250); } console.log(); return out; };
 
 const r = await data(root);
 if (r.subarray(0, 4).toString() !== 'NOOP') throw new Error('not a NOOP root');
