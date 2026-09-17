@@ -48,7 +48,9 @@
     const dec = s => { const b = [0]; for (const ch of s) { let c = B58.indexOf(ch); if (c < 0) throw new Error('b58'); for (let i = 0; i < b.length; i++) { c += b[i] * 58; b[i] = c & 255; c >>= 8; } while (c) { b.push(c & 255); c >>= 8; } } for (const ch of s) { if (ch !== '1') break; b.push(0); } return new Uint8Array(b.reverse()); };
     const enc = buf => { const d = [0]; for (const x of buf) { let c = x; for (let i = 0; i < d.length; i++) { c += d[i] << 8; d[i] = c % 58; c = (c / 58) | 0; } while (c) { d.push(c % 58); c = (c / 58) | 0; } } let s = ''; for (const x of buf) { if (x) break; s += '1'; } for (let i = d.length - 1; i >= 0; i--) s += B58[d[i]]; return s; };
     let id = 1;
-    async function rpc(body) { const r = await fetch(C.rpc, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }); return r.json(); }
+    // rotate through browser-friendly RPCs; the official public one 403s browsers
+    const RPCS = [...new Set([C.rpc, 'https://solana-rpc.publicnode.com', 'https://api.mainnet-beta.solana.com'].filter(Boolean))]; let ri = 0;
+    async function rpc(body) { for (let t = 0; t < RPCS.length; t++) { try { const r = await fetch(RPCS[ri], { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }); if (r.ok) return r.json(); } catch (e) {} ri = (ri + 1) % RPCS.length; } return []; }
     async function txData(sigs) {
       // returns Uint8Array data of the first (only) instruction of each tx, batched
       const out = new Array(sigs.length); const todo = sigs.map((s, i) => i);

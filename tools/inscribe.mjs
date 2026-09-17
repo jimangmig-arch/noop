@@ -136,7 +136,7 @@ const cfgPath = resolve(ROOT, 'site', DEVNET ? 'config.devnet.js' : 'config.js')
 const prev = existsSync(resolve(ROOT, 'site', 'config.js')) ? readFileSync(resolve(ROOT, 'site', 'config.js'), 'utf8') : '';
 const keep = k => (prev.match(new RegExp(`${k}:\\s*"([^"]*)"`)) || [, ''])[1];
 const cfg = {
-  root: progress.root, rpc: DEVNET ? RPC : (keep('rpc') || 'https://api.mainnet-beta.solana.com'), nothing: progress.nothing,
+  root: progress.root, rpc: DEVNET ? RPC : (keep('rpc') || 'https://solana-rpc.publicnode.com'), nothing: progress.nothing,
   chunks: all.length, index: nIndex, bytes: gz.length, cost_lamports: cost, sha: sha.toString('hex'), wallet: progress.wallet,
   fees: keep('fees'), ca: keep('ca'), x: keep('x') || 'https://x.com/noopcoin', pump: keep('pump'), git: keep('git') || 'https://github.com/jimangmig-arch/noop',
 };

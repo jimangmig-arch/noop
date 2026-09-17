@@ -1,7 +1,7 @@
 // written by tools/inscribe.mjs · 2026-09-17T15:57:42.259Z
 window.NOOP_CONFIG = {
   "root": "386xVdYTGeMckFsDpS8yhzyUrEpQd17LFm4mCtHokGEwhFyw2RexRm4aSa22FJLccoGojeHpkHAkoLhParcD1LzE",
-  "rpc": "https://api.mainnet-beta.solana.com",
+  "rpc": "https://solana-rpc.publicnode.com",
   "nothing": "i4wCMe1DsM73tu4o9aqvGqACAKRKcgAD3Tfyzpuaw3o",
   "chunks": 20,
   "index": 2,
