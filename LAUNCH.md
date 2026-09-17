@@ -20,7 +20,7 @@ Everything you need to post, in order. Voice: deadpan, calm, short. Never hype. 
    (attach og.png or a 10-second clip of the game booting from the ledger)
 
 2. For the non-devs: every CPU has an instruction called NOP, "no operation." It does nothing for a beat, on purpose.
-   Solana has a program called No-op that does the same. We put the entire page through it. <N> transactions. <cost> SOL. Root tx: <sig>
+   On Solana, @deanmlittle wrote the smallest program that exists: 336 bytes, does nothing, 1 compute unit. We put the entire page through it. 20 transactions. 0.0001 SOL. Root tx: 386xVd…cD1LzE
 
 3. There is a game. You are a NOOP instruction inside a CPU. Every other instruction is trying to do something. You halt them. The last level is called RUG.
    It boots from the ledger. Delete our domain and it still runs.
@@ -28,8 +28,8 @@ Everything you need to post, in order. Voice: deadpan, calm, short. Never hype. 
 4. Press "Do nothing" on the site and your wallet sends a real No-op transaction that does nothing, with a note that says so. Recorded forever. The counter can only go up.
 
 5. The honest part, since DOOM said "127 SOL invested" and spent 0.012:
-   · real cost: <cost> lamports, on the Proof tab
-   · inscription wallet: <addr>, funded in the open
+   · real cost: 100,000 lamports (0.0001 SOL), on the Proof tab
+   · inscription wallet: AEPJKDwWdRbnbvc5cQRqF4VUh8V7mqFE8JmYqTywAYzb, funded in the open
    · creator fee wallet: <addr>. Fees: <policy, see below>
    · one coin. no sequel. no v2.
    · code: github.com/jimangmig-arch/noop, verify script included
@@ -67,8 +67,8 @@ Recommendation: B. It gives the account a weekly ritual post and a receipt every
 
 ## Before launch (me)
 
-- [ ] You send ~0.01 SOL to the inscription wallet **AEPJKDwWdRbnbvc5cQRqF4VUh8V7mqFE8JmYqTywAYzb** (real cost is ~0.0001 SOL; the rest comes back to you, I'll send it wherever you say).
-- [ ] I run `node tools/inscribe.mjs`, verify with `tools/verify.mjs`, redeploy. Site flips from "preview build" to "served from the Solana ledger."
+- [x] Inscribed 2026-09-17: root 386xVd…cD1LzE, 20 txs, 100,000 lamports. Verified byte-identical from chain. Site is served from the ledger. (0.0146 SOL left in the inscription wallet: reserve for re-inscription after playtest, then send the rest back.)
+- [ ] Re-inscribe once after playtest fixes (the page copy should also credit Dean Little's noop; that text is inside the inscribed page).
 - [ ] You playtest the game on desktop and phone and tell me what to change.
 - [ ] You create the X account and leave it logged in on Chrome.
 - [ ] We pick the fee policy.
