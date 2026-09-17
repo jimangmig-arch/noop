@@ -52,21 +52,19 @@
     const RPCS = [...new Set([C.rpc, 'https://solana-rpc.publicnode.com', 'https://api.mainnet-beta.solana.com'].filter(Boolean))]; let ri = 0;
     async function rpc(body) { for (let t = 0; t < RPCS.length; t++) { try { const r = await fetch(RPCS[ri], { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body) }); if (r.ok) return r.json(); } catch (e) {} ri = (ri + 1) % RPCS.length; } return []; }
     async function txData(sigs) {
-      // returns Uint8Array data of the first (only) instruction of each tx, batched
-      const out = new Array(sigs.length); const todo = sigs.map((s, i) => i);
-      for (let attempt = 0; attempt < 8 && todo.length; attempt++) {
-        for (let k = 0; k < todo.length; k += 4) {
-          if (k) await new Promise(r => setTimeout(r, 350));
-          const part = todo.slice(k, k + 4);
-          let res; try { res = await rpc(part.map(i => ({ jsonrpc: '2.0', id: id++, method: 'getTransaction', params: [sigs[i], { encoding: 'json', maxSupportedTransactionVersion: 1 }] }))); } catch (e) { res = []; }
-          const arr = Array.isArray(res) ? res : [res];
-          arr.forEach((r, j) => { const i = part[j]; const d = r && r.result && r.result.transaction.message.instructions[0].data; if (d) out[i] = dec(d); });
-          say('reading transaction ' + out.filter(Boolean).length + ' / ' + sigs.length, out.filter(Boolean).length / sigs.length);
+      // one getTransaction per request (public RPCs cap batches at 1), 3 in flight, retry with backoff
+      const out = new Array(sigs.length); let next = 0, done = 0;
+      const one = async i => {
+        for (let attempt = 0; attempt < 8; attempt++) {
+          const r = await rpc({ jsonrpc: '2.0', id: id++, method: 'getTransaction', params: [sigs[i], { encoding: 'json', maxSupportedTransactionVersion: 1 }] });
+          const d = r && r.result && r.result.transaction && r.result.transaction.message.instructions[0].data;
+          if (d) { out[i] = dec(d); done++; say('reading transaction ' + done + ' / ' + sigs.length, done / sigs.length); return; }
+          say('rpc is busy, retrying…'); await new Promise(res => setTimeout(res, 600 * (attempt + 1)));
         }
-        for (let i = todo.length - 1; i >= 0; i--) if (out[todo[i]]) todo.splice(i, 1);
-        if (todo.length) { say('rpc is busy, retrying ' + todo.length + ' chunks…'); await new Promise(r => setTimeout(r, 1200 * (attempt + 1))); }
-      }
-      if (todo.length) throw new Error('rpc gave up on ' + todo.length + ' chunks');
+        throw new Error('rpc gave up on chunk ' + i);
+      };
+      const workers = Array.from({ length: Math.min(3, sigs.length) }, async () => { while (next < sigs.length) { const i = next++; await one(i); await new Promise(res => setTimeout(res, 120)); } });
+      await Promise.all(workers);
       return out;
     }
     say('reading root transaction', 0.02);
