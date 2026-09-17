@@ -1,7 +1,7 @@
 /* NOOP — a tiny first-person shooter inside a CPU.
    You are a NOOP instruction. Everything else is trying to do something. Stop it.
    Original code, no engine, no assets: walls, monsters and sounds are generated at boot.
-   MIT — github.com/Lindophx/noop */
+   MIT — github.com/jimangmig-arch/noop */
 (function () {
   'use strict';
 

@@ -5,5 +5,5 @@ window.NOOP_CONFIG = {
   nothing: "",
   chunks: 0, index: 0, bytes: 0, cost_lamports: 0, sha: "",
   wallet: "", fees: "", ca: "",
-  x: "https://x.com/noopcoin", pump: "", git: "https://github.com/Lindophx/noop"
+  x: "https://x.com/noopcoin", pump: "", git: "https://github.com/jimangmig-arch/noop"
 };

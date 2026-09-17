@@ -4,7 +4,7 @@
   'use strict';
   const C = Object.assign({
     root: '', rpc: 'https://api.mainnet-beta.solana.com', nothing: '', chunks: 0, bytes: 0, cost_lamports: 0, sha: '',
-    wallet: '', fees: '', ca: '', x: 'https://x.com/noopcoin', pump: '', git: 'https://github.com/Lindophx/noop', loaded_from_chain: false,
+    wallet: '', fees: '', ca: '', x: 'https://x.com/noopcoin', pump: '', git: 'https://github.com/jimangmig-arch/noop', loaded_from_chain: false,
   }, window.NOOP_CONFIG || {});
   const $ = id => document.getElementById(id);
   const NOOP_PROGRAM = 'noopb9bkMVfRPU8AsbpTUg8AQkHtKwMYZiFUjNRtMmV';

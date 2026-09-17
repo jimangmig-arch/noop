@@ -135,7 +135,7 @@ const keep = k => (prev.match(new RegExp(`${k}:\\s*"([^"]*)"`)) || [, ''])[1];
 const cfg = {
   root: progress.root, rpc: DEVNET ? RPC : (keep('rpc') || 'https://api.mainnet-beta.solana.com'), nothing: progress.nothing,
   chunks: all.length, index: nIndex, bytes: gz.length, cost_lamports: cost, sha: sha.toString('hex'), wallet: progress.wallet,
-  fees: keep('fees'), ca: keep('ca'), x: keep('x') || 'https://x.com/noopcoin', pump: keep('pump'), git: keep('git') || 'https://github.com/Lindophx/noop',
+  fees: keep('fees'), ca: keep('ca'), x: keep('x') || 'https://x.com/noopcoin', pump: keep('pump'), git: keep('git') || 'https://github.com/jimangmig-arch/noop',
 };
 writeFileSync(cfgPath, '// written by tools/inscribe.mjs · ' + new Date().toISOString() + '\nwindow.NOOP_CONFIG = ' + JSON.stringify(cfg, null, 2) + ';\n');
 console.log(`wrote ${cfgPath}\nverify: node tools/verify.mjs ${progress.root}${DEVNET ? ' --devnet' : ''}`);
